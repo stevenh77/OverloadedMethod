@@ -15,38 +15,46 @@ namespace OverloadedMethod
             {
                 // option 1
                 processor.GetType()
-                         .GetMethod("Execute", 
+                         .GetMethod("Execute",
                                     BindingFlags.Instance | BindingFlags.NonPublic,
                                     null,
                                     new[] { shape.GetType() },
                                     null)
-                          .Invoke(processor, 
+                          .Invoke(processor,
                                   new object[] { shape });
 
                 // or option 2 (requires known definition of all drived types and a line per type)
                 if (shape is Circle) processor.Execute(shape as Circle);
                 else if (shape is Triangle) processor.Execute(shape as Triangle);
 
+                // option 3... BOOM!!!!  Works a treat :)
+                processor.Execute(shape as dynamic);
             }
         }
     }
 
     class Shape { }
 
-    class Circle : Shape { }
+    class Circle : Shape 
+    {
+        public int Circumference { get { return 10; } }
+    }
 
-    class Triangle : Shape { }
+    class Triangle : Shape
+    {
+        public int HypotenuseLength { get { return 20; } }
+    }
 
     class Processor
     {
         internal void Execute(Circle circle)
         {
-            Console.WriteLine("Executing with a Circle!");
+            Console.WriteLine("Executing with a Circle with circumference {0}!", circle.Circumference);
         }
 
         internal void Execute(Triangle triangle)
         {
-            Console.WriteLine("Executing with a Triangle!");
+            Console.WriteLine("Executing with a Triangle hypotenuse length of {0}!", triangle.HypotenuseLength);
         }    
     }
 }
