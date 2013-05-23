@@ -13,7 +13,20 @@ namespace OverloadedMethod
 
             foreach (var shape in shapes)
             {
-                processor.Execute(shape);
+                // option 1
+                processor.GetType()
+                         .GetMethod("Execute", 
+                                    BindingFlags.Instance | BindingFlags.NonPublic,
+                                    null,
+                                    new[] { shape.GetType() },
+                                    null)
+                          .Invoke(processor, 
+                                  new object[] { shape });
+
+                // or option 2 (requires known definition of all drived types and a line per type)
+                if (shape is Circle) processor.Execute(shape as Circle);
+                else if (shape is Triangle) processor.Execute(shape as Triangle);
+
             }
         }
     }
@@ -26,19 +39,6 @@ namespace OverloadedMethod
 
     class Processor
     {
-        internal void Execute(Shape shape)
-        {
-            if (shape.GetType() == typeof(Shape)) 
-                throw new Exception("Method intended for derived objects");
-
-            MethodInfo method = this.GetType().GetMethod("Execute", 
-                                                         BindingFlags.Instance | BindingFlags.NonPublic, 
-                                                         null, 
-                                                         new [] { shape.GetType() }, 
-                                                         null);
-            method.Invoke(this, new object[] { shape });
-        }
-
         internal void Execute(Circle circle)
         {
             Console.WriteLine("Executing with a Circle!");
